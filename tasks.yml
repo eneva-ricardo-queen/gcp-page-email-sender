@@ -8,8 +8,8 @@ tasks:
     formats: [png, pdf, html]
     body_formats: [png]
     attachment_formats: [pdf]
-    body_text_before: "Segue a página {id} referente a {date}."
-    body_text_after: "Anexo: PDF. Dúvidas? Contate o time de Portfólio pep@eneva.com.br."
+    body_text_before: "Segue o Relatório Diário de Futura referente a {date}."
+    body_text_after: "Dúvidas? Contate o time de Portfólio em pep@eneva.com.br."
     render:
       wait_selector: 'text=Margem Bruta'
       validate_text: 'Margem Bruta'
