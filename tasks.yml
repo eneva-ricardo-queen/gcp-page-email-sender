@@ -1,9 +1,10 @@
 tasks:
   - id: rdo-futura
-    url: https://pep-dashboard-uc.a.run.app/rdo-futura
+    url: https://pep.labs.eneva.com.br/rdo-futura
     schedule: "0 12 * * *"
-    recipients_secret: prod_RDO_RECIPIENTS
-    sender_secret: prod_RDO_SENDER
+    sender: pep@eneva.com.br
+    recipients:
+      - ricardo.queen@eneva.com.br
     formats: [png, pdf, html]
     wait_selector: 'text=Margem Bruta'
     wait_extra_seconds: 3

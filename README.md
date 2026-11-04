@@ -8,7 +8,7 @@ Job genérico que renderiza páginas Streamlit (headless, via Playwright) e envi
 ```bash
 # Usar o venv do gcp-pep-dashboard (tem gcp-lib, msal, requests)
 source .venv/bin/activate
-python /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender/scripts/test_graph.py
+PYTHONPATH=/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender/src python /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender/scripts/test_graph.py
 ```
 Credenciais via Secret Manager (ADC/gcloud). O teste envia um e-mail de teste para o próprio remetente.
 

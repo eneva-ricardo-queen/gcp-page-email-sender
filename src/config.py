@@ -74,8 +74,17 @@ def secret(name: str, attr: str | None = None) -> str:
     raise RuntimeError(f"Secret '{name}' not found in env nor gcloud")
 
 
-def parse_recipients(raw: str) -> list[str]:
-    raw = raw.strip()
-    if raw.startswith("["):
-        return json.loads(raw)
-    return [x.strip() for x in raw.split(",") if x.strip()]
+def get_sender(task: dict) -> str:
+    s = task.get("sender")
+    if not s:
+        raise ValueError("task missing 'sender'")
+    return s
+
+
+def get_recipients(task: dict) -> list[str]:
+    r = task.get("recipients")
+    if isinstance(r, list):
+        return [str(x).strip() for x in r if str(x).strip()]
+    if isinstance(r, str):
+        return [x.strip() for x in r.split(",") if x.strip()]
+    raise ValueError("task missing 'recipients'")

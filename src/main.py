@@ -7,9 +7,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.config import get_task, secret, parse_recipients
-from src.render import render_page
-from src.mail import send_mail
+from config import get_task, get_sender, get_recipients
+from render import render_page
+from mail import send_mail
 
 
 def main() -> int:
@@ -29,14 +29,14 @@ def main() -> int:
     result = render_page(url, wait_selector, extra, formats)
     print(f"[{task['id']}] captured: {result['files']}")
 
-    sender = secret(task["sender_secret"])
-    recipients = parse_recipients(secret(task["recipients_secret"]))
+    sender = get_sender(task)
+    recipients = get_recipients(task)
     subject = subject_tpl.format(id=task["id"], date=date_str)
     body = f"<p>Segue em anexo a página <b>{task['id']}</b> referente a {date_str}.</p>"
 
-    tenant_id = secret("prod_GRAPH_TENANT_ID")
-    client_id = secret("prod_GRAPH_CLIENT_ID")
-    client_secret = secret("prod_GRAPH_CLIENT_SECRET")
+    tenant_id = secret("prod_PORTFOLIO_TENANT_ID", attr="tenant_id")
+    client_id = secret("prod_PORTFOLIO_CLIENT_ID", attr="client_id")
+    client_secret = secret("prod_PORTFOLIO_CLIENT_SECRET", attr="client_secret")
 
     send_mail(sender, recipients, subject, body, result["files"],
               tenant_id, client_id, client_secret)
