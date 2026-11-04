@@ -33,7 +33,7 @@ if gcloud run jobs describe "${JOB}" --region "${CLOUD_RUN_REGION}" --project "$
     --args="${ARGS}" \
     --vpc-connector="${VPC_CONNECTOR}" \
     --service-account="${GCP_SERVICE_ACCOUNT_EMAIL}" \
-    --set-env-vars="APP_URL=https://webapp-pep-856929023451-us-central1.run.app/rd-futura" \
+    --set-env-vars="APP_URL=https://webapp-pep-856929023451.us-central1.run.app/rd-futura" \
     --region "${CLOUD_RUN_REGION}" \
     --project "${GCP_PROJECT_ID}" \
     --quiet
@@ -48,7 +48,7 @@ else
     --args="${ARGS}" \
     --vpc-connector="${VPC_CONNECTOR}" \
     --service-account="${GCP_SERVICE_ACCOUNT_EMAIL}" \
-    --set-env-vars="APP_URL=https://webapp-pep-856929023451-us-central1.run.app/rd-futura" \
+    --set-env-vars="APP_URL=https://webapp-pep-856929023451.us-central1.run.app/rd-futura" \
     --region "${CLOUD_RUN_REGION}" \
     --project "${GCP_PROJECT_ID}" \
     --quiet
