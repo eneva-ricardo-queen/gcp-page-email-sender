@@ -1,0 +1,102 @@
+name: Build and Deploy
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+  WIF_PROVIDER: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WIF_POOL_ID }}/providers/${{ secrets.WIF_PROVIDER_ID }}
+
+  ARTIFACT_REGISTRY_LOCATION: us-central1
+  ARTIFACT_REGISTRY_REPO: repo-artefatos-imagens-preco-gas-gnl
+  PYTHON_REPO_URL: "us-central1-python.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/repo-artefatos-imagens-py-lib-custom"
+  IMAGE_NAME: ${{ github.event.repository.name }}
+
+  CLOUD_RUN_REGION: us-central1
+  VPC_CONNECTOR_NAME: precogas-vpc-connector
+  VPC_HOST_PROJECT_ID: ${{ secrets.VPC_HOST_PROJECT_ID }}
+  SCHEDULER_TIME_ZONE: "America/Sao_Paulo"
+
+jobs:
+  validate:
+    name: Validate Dependencies
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Set up Cloud SDK (gcloud)
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
+
+      - name: Install Dependencies
+        run: |
+          export GCLOUD_TOKEN=$(gcloud auth print-access-token)
+          pip install \
+            --extra-index-url "https://oauth2accesstoken:${GCLOUD_TOKEN}@${{ env.PYTHON_REPO_URL }}/simple/repo-artefatos-imagens-py-lib-custom" \
+            -r requirements.txt
+
+  deploy:
+    name: Build, Push and Deploy to Cloud Run Jobs
+    needs: validate
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on main branch
+        run: git merge-base --is-ancestor HEAD origin/main
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Set up Cloud SDK (gcloud)
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev
+
+      - name: Build and Push Docker image
+        run: |
+          IMAGE_TAG_VERSION=$(echo $GITHUB_REF_NAME | sed 's/v//')
+          IMAGE_URL="${{ env.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG_VERSION}"
+          echo "Building and pushing image: $IMAGE_URL"
+          docker build \
+            --build-arg GCLOUD_KEY_CONTENT="$(cat ${{ steps.auth.outputs.credentials_file_path }})" \
+            -t "$IMAGE_URL" -f Dockerfile .
+          docker push "$IMAGE_URL"
+          echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
+
+      - name: "Deploy: page-email-sender (RDO Futura)"
+        run: ./.github/scripts/deploy-job.sh job-page-email-sender 300 2Gi 2 "--task,rdo-futura" "0 12 * * *"
+PYEOF
+cd /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender && echo "created" && ls .github/workflows .github/scripts
