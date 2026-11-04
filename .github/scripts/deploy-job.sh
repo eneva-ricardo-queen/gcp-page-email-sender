@@ -85,6 +85,3 @@ if [ -n "${SCHEDULE}" ]; then
       --quiet
   fi
 fi
-PYEOF
-chmod +x .github/scripts/deploy-job.sh
-echo "created"

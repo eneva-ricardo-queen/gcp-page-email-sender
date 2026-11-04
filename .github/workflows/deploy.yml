@@ -98,5 +98,3 @@ jobs:
 
       - name: "Deploy: page-email-sender (RDO Futura)"
         run: ./.github/scripts/deploy-job.sh job-page-email-sender 600 2Gi 2 "--task,rdo-futura" "0 12 * * *"
-PYEOF
-cd /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender && echo "created" && ls .github/workflows .github/scripts
