@@ -23,43 +23,26 @@ def _token(tenant_id: str, client_id: str, client_secret: str) -> str:
     return result["access_token"]
 
 
-def _attachment_entry(path: str, inline: bool = False, content_id: str | None = None) -> dict:
-    data = Path(path).read_bytes()
+def _attachment_entry(att: dict) -> dict:
+    data = Path(att["path"]).read_bytes()
     entry = {
         "@odata.type": "#microsoft.graph.fileAttachment",
-        "name": Path(path).name,
+        "name": att.get("name") or Path(att["path"]).name,
         "contentType": "application/octet-stream",
         "contentBytes": base64.b64encode(data).decode("ascii"),
     }
-    if inline and content_id:
+    if att.get("inline") and att.get("content_id"):
         entry["isInline"] = True
-        entry["contentId"] = content_id
+        entry["contentId"] = att["content_id"]
     return entry
 
 
 def send_mail(sender: str, recipients: list[str], subject: str,
               body_html: str, attachments: list[dict],
               tenant_id: str, client_id: str, client_secret: str) -> None:
-    """Envia e-mail via Graph.
-
-    attachments: lista de dicts com chaves:
-        - path: caminho do arquivo
-        - inline: bool (se True, anexa como inline com contentId)
-        - content_id: str (usado quando inline=True)
-        - name: str (opcional, nome do anexo)
-    """
+    """Envia e-mail via Graph."""
     token = _token(tenant_id, client_id, client_secret)
-    atts = []
-    for att in attachments:
-        atts.append(_attachment_entry(
-            att["path"],
-            inline=att.get("inline", False),
-            content_id=att.get("content_id"),
-        ))
-    # ajusta o name se fornecido
-    for att, entry in zip(attachments, atts):
-        if att.get("name"):
-            entry["name"] = att["name"]
+    atts = [_attachment_entry(att) for att in attachments]
 
     payload = {
         "message": {

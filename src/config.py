@@ -27,7 +27,8 @@ def get_task(task_id: str) -> dict:
 def _gcloud_secret(secret_id: str) -> str | None:
     try:
         out = subprocess.run(
-            ["gcloud", "secrets", "versions", "access", "latest", f"--secret={secret_id}", f"--project={PROJECT_ID}"],
+            ["gcloud", "secrets", "versions", "access", "latest",
+             f"--secret={secret_id}", f"--project={PROJECT_ID}"],
             capture_output=True, text=True, timeout=30,
         )
         if out.returncode == 0 and out.stdout.strip():
@@ -49,23 +50,23 @@ def _secret_id_for(attr: str) -> str | None:
 
 
 def secret(name: str, attr: str | None = None) -> str:
-    """Lê secret do env ou via gcloud CLI (usando config.yml para mapear attr->secret_id)."""
-    # 1. env
+    """Lê secret do env ou via gcloud CLI."""
+    # 1. env (local)
     val = os.environ.get(name)
     if val:
         return val
-    # 2. gcloud CLI direto (name como secret_id)
+    # 2. gcloud CLI direto
     v = _gcloud_secret(name)
     if v:
         return v
-    # 3. mapear attr -> secret_id
+    # 3. mapear attr -> secret_id -> gcloud
     if attr:
         sid = _secret_id_for(attr)
         if sid:
             v = _gcloud_secret(sid)
             if v:
                 return v
-    # 4. mapear name.lower() -> secret_id
+    # 4. mapear name -> secret_id -> gcloud
     sid = _secret_id_for(name.lower())
     if sid:
         v = _gcloud_secret(sid)

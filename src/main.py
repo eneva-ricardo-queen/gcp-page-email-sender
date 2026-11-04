@@ -1,7 +1,6 @@
 """Entry point do job: renderiza a página da tarefa e envia por e-mail."""
 
 import argparse
-import base64
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +12,35 @@ from config import (get_task, get_sender, get_recipients,
                     get_render_config)
 from render import render_page
 from mail import send_mail
+
+
+def _build_body(task: dict, date_str: str, files: dict, body_formats: list[str]) -> str:
+    parts = [f"<p>Segue a página <b>{task['id']}</b> referente a {date_str}.</p>"]
+    for fmt in body_formats:
+        if fmt not in files:
+            continue
+        if fmt == "png":
+            parts.append(f'<p><img src="cid:inline_{fmt}" style="max-width:100%;height:auto;" alt="screenshot" /></p>')
+        elif fmt == "html":
+            content = Path(files[fmt]).read_text(encoding="utf-8")
+            if len(content) > 100000:
+                content = content[:100000] + "\n<!-- truncado -->"
+            parts.append(f'<details><summary>HTML completo da página</summary><pre style="white-space:pre-wrap;font-size:12px;">{content}</pre></details>')
+    return "\n".join(parts)
+
+
+def _build_attachments(files: dict, body_formats: list[str], attachment_formats: list[str]) -> list[dict]:
+    attachments = []
+    seen = set()
+    for fmt in body_formats:
+        if fmt in files and files[fmt] not in seen:
+            attachments.append({"path": files[fmt], "inline": True, "content_id": f"inline_{fmt}", "name": Path(files[fmt]).name})
+            seen.add(files[fmt])
+    for fmt in attachment_formats:
+        if fmt in files and files[fmt] not in seen:
+            attachments.append({"path": files[fmt], "inline": False, "name": Path(files[fmt]).name})
+            seen.add(files[fmt])
+    return attachments
 
 
 def main() -> int:
@@ -36,49 +64,12 @@ def main() -> int:
     files = result["files"]
     print(f"[{task['id']}] captured: {files}")
 
+    body_html = _build_body(task, date_str, files, body_formats)
+    attachments = _build_attachments(files, body_formats, attachment_formats)
+
     sender = get_sender(task)
     recipients = get_recipients(task)
     subject = subject_tpl.format(id=task["id"], date=date_str)
-
-    # Monta o corpo do e-mail
-    body_parts = [f"<p>Segue a página <b>{task['id']}</b> referente a {date_str}.</p>"]
-    attachments = []
-
-    # Inline (cid) para body_formats
-    for fmt in body_formats:
-        if fmt not in files:
-            continue
-        path = files[fmt]
-        cid = f"inline_{fmt}"
-        if fmt == "png":
-            body_parts.append(f'<p><img src="cid:{cid}" style="max-width:100%;height:auto;" alt="screenshot" /></p>')
-        elif fmt == "html":
-            # Embute o HTML completo da página no corpo (truncado a 100k para não exceder limite)
-            html_content = Path(path).read_text(encoding="utf-8")
-            if len(html_content) > 100000:
-                html_content = html_content[:100000] + "\n<!-- truncado -->"
-            body_parts.append(f'<details><summary>HTML completo da página</summary><pre style="white-space:pre-wrap;font-size:12px;">{html_content}</pre></details>')
-        attachments.append({"path": path, "inline": True, "content_id": cid, "name": Path(path).name})
-
-    # Anexos normais para attachment_formats
-    for fmt in attachment_formats:
-        if fmt not in files:
-            continue
-        path = files[fmt]
-        attachments.append({"path": path, "inline": False, "name": Path(path).name})
-
-    # Se um formato está em ambos (body + attachment), evita duplicar anexo
-    # (já adicionado acima como inline; não re-adiciona)
-    seen_paths = set()
-    unique_attachments = []
-    for att in attachments:
-        if att["path"] in seen_paths:
-            continue
-        seen_paths.add(att["path"])
-        unique_attachments.append(att)
-    attachments = unique_attachments
-
-    body_html = "\n".join(body_parts)
 
     tenant_id = secret("prod_PORTFOLIO_TENANT_ID", attr="tenant_id")
     client_id = secret("prod_PORTFOLIO_CLIENT_ID", attr="client_id")
