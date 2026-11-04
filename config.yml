@@ -1,0 +1,17 @@
+# Config de secrets para o page-email-sender (lido pelo gcp.secret_manager.SecretManager)
+secrets:
+  - attr_name: tenant_id
+    secret_id: prod_PORTFOLIO_TENANT_ID
+  - attr_name: client_id
+    secret_id: prod_PORTFOLIO_CLIENT_ID
+  - attr_name: client_secret
+    secret_id: prod_PORTFOLIO_CLIENT_SECRET
+  - attr_name: sharepoint_site_id
+    secret_id: prod_PORTFOLIO_SHAREPOINT_SITE_ID
+  - attr_name: rdo_sender
+    secret_id: prod_RDO_SENDER
+  - attr_name: rdo_recipients
+    secret_id: prod_RDO_RECIPIENTS
+
+static:
+  project_id: "eva-prj-prd-preco-gas-gnl-s9"
