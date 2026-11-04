@@ -40,12 +40,3 @@ COPY . .
 
 ENV PYTHONPATH=/app
 ENTRYPOINT ["python", "src/main.py"]
-PYEOF
-cd /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender && python -c "
-p='Dockerfile'
-lines=open(p).read().splitlines()
-while lines and (lines[-1].startswith('cd ') or 'echo ok' in lines[-1] or lines[-1].strip() in ('PYEOF','')):
-    lines.pop()
-open(p,'w').write('\n'.join(lines)+'\n')
-print('done')
-"
