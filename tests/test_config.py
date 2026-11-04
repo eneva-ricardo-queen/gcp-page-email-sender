@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from config import load_tasks, get_task, get_sender, get_recipients
+from config import load_tasks, get_task, get_sender, get_recipients, get_body_formats, get_attachment_formats
 
 REQUIRED_FIELDS = {"id", "url", "schedule", "sender", "recipients", "formats", "wait_selector"}
 
@@ -39,6 +39,12 @@ def test_get_sender_recipients():
     t = get_task("rdo-futura")
     assert "@" in get_sender(t)
     assert all("@" in r for r in get_recipients(t))
+
+
+def test_body_and_attachment_formats():
+    t = get_task("rdo-futura")
+    assert "png" in get_body_formats(t)
+    assert "pdf" in get_attachment_formats(t)
 
 
 def test_get_task_missing_raises():

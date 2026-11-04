@@ -26,6 +26,12 @@ def render_page(url: str, wait_selector: str, extra_seconds: int = 3,
             page.wait_for_selector(wait_selector, timeout=60000)
         page.wait_for_timeout(extra_seconds * 1000)
 
+        # Scroll para carregar conteúdo lazy (full-page)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(1000)
+        page.evaluate("window.scrollTo(0, 0)")
+        page.wait_for_timeout(500)
+
         if "png" in formats:
             png = f"{base}.png"
             page.screenshot(path=png, full_page=True)

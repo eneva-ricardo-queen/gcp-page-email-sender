@@ -88,3 +88,11 @@ def get_recipients(task: dict) -> list[str]:
     if isinstance(r, str):
         return [x.strip() for x in r.split(",") if x.strip()]
     raise ValueError("task missing 'recipients'")
+
+
+def get_body_formats(task: dict) -> list[str]:
+    return task.get("body_formats", [])
+
+
+def get_attachment_formats(task: dict) -> list[str]:
+    return task.get("attachment_formats", [])

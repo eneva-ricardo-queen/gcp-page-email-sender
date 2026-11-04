@@ -1,7 +1,6 @@
 """Envio de e-mail via Microsoft Graph API (client credentials)."""
 
 import base64
-import os
 from pathlib import Path
 
 import msal
@@ -24,19 +23,43 @@ def _token(tenant_id: str, client_id: str, client_secret: str) -> str:
     return result["access_token"]
 
 
+def _attachment_entry(path: str, inline: bool = False, content_id: str | None = None) -> dict:
+    data = Path(path).read_bytes()
+    entry = {
+        "@odata.type": "#microsoft.graph.fileAttachment",
+        "name": Path(path).name,
+        "contentType": "application/octet-stream",
+        "contentBytes": base64.b64encode(data).decode("ascii"),
+    }
+    if inline and content_id:
+        entry["isInline"] = True
+        entry["contentId"] = content_id
+    return entry
+
+
 def send_mail(sender: str, recipients: list[str], subject: str,
-              body_html: str, attachments: dict[str, str],
+              body_html: str, attachments: list[dict],
               tenant_id: str, client_id: str, client_secret: str) -> None:
+    """Envia e-mail via Graph.
+
+    attachments: lista de dicts com chaves:
+        - path: caminho do arquivo
+        - inline: bool (se True, anexa como inline com contentId)
+        - content_id: str (usado quando inline=True)
+        - name: str (opcional, nome do anexo)
+    """
     token = _token(tenant_id, client_id, client_secret)
     atts = []
-    for name, path in attachments.items():
-        data = Path(path).read_bytes()
-        atts.append({
-            "@odata.type": "#microsoft.graph.fileAttachment",
-            "name": Path(path).name,
-            "contentType": "application/octet-stream",
-            "contentBytes": base64.b64encode(data).decode("ascii"),
-        })
+    for att in attachments:
+        atts.append(_attachment_entry(
+            att["path"],
+            inline=att.get("inline", False),
+            content_id=att.get("content_id"),
+        ))
+    # ajusta o name se fornecido
+    for att, entry in zip(attachments, atts):
+        if att.get("name"):
+            entry["name"] = att["name"]
 
     payload = {
         "message": {
