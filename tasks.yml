@@ -15,6 +15,7 @@ tasks:
       wait_end_selector: 'footer, [data-testid="stFooter"]'
       wait_end_timeout: 30000
       extra_seconds: 5
+      validate_text: 'Margem Bruta'
       viewport_height: 2000
       device_scale_factor: 2
     subject_template: "RDO Futura — {date}"

@@ -76,6 +76,13 @@ def render_page(url: str, formats: list[str] | None = None,
         page = _setup_page(browser, viewport, device_scale_factor=rc.get("device_scale_factor", 1))
         page.goto(url, wait_until="networkidle", timeout=120000)
         _wait_for_content(page, rc["wait_selector"], rc["wait_end_selector"], rc["wait_end_timeout"])
+        # Validacao: checa se a pagina renderizou (nao e 404/fallback)
+        html = page.content()
+        validate_text = rc.get("validate_text", "")
+        if validate_text and validate_text not in html:
+            raise RuntimeError(f"Page did not render correctly (missing '{validate_text}'): {url}")
+        if "You need to enable JavaScript" in html and (not validate_text or validate_text not in html):
+            raise RuntimeError(f"Page did not render correctly (JS not loaded): {url}")
         _scroll_to_load(page, rc["scroll_steps"], rc["scroll_step_px"])
         page.wait_for_timeout(rc["extra_seconds"] * 1000)
         results["files"] = _capture(page, base, formats)
