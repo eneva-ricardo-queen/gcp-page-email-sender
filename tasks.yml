@@ -1,0 +1,10 @@
+tasks:
+  - id: rdo-futura
+    url: https://pep-dashboard-uc.a.run.app/rdo-futura
+    schedule: "0 12 * * *"
+    recipients_secret: prod_RDO_RECIPIENTS
+    sender_secret: prod_RDO_SENDER
+    formats: [png, pdf, html]
+    wait_selector: 'text=Margem Bruta'
+    wait_extra_seconds: 3
+    subject_template: "RDO Futura — {date}"
