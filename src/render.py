@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 from config import DEFAULT_RENDER
 
 
-def _setup_page(browser, viewport: dict, device_scale_factor: int = 2):
+def _setup_page(browser, viewport: dict, device_scale_factor: int = 1):
     context = browser.new_context(viewport=viewport, device_scale_factor=device_scale_factor)
     return context.new_page()
 
@@ -73,7 +73,7 @@ def render_page(url: str, formats: list[str] | None = None,
     results = {"url": url, "files": {}}
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = _setup_page(browser, viewport, device_scale_factor=2)
+        page = _setup_page(browser, viewport, device_scale_factor=rc.get("device_scale_factor", 1))
         page.goto(url, wait_until="networkidle", timeout=120000)
         _wait_for_content(page, rc["wait_selector"], rc["wait_end_selector"], rc["wait_end_timeout"])
         _scroll_to_load(page, rc["scroll_steps"], rc["scroll_step_px"])

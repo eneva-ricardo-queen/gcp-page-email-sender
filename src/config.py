@@ -109,6 +109,7 @@ DEFAULT_RENDER = {
     "viewport_height": 4000,
     "scroll_steps": 10,
     "scroll_step_px": 500,
+    "device_scale_factor": 1,
 }
 
 

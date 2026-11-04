@@ -16,4 +16,5 @@ tasks:
       wait_end_timeout: 30000
       extra_seconds: 5
       viewport_height: 2000
+      device_scale_factor: 2
     subject_template: "RDO Futura — {date}"
