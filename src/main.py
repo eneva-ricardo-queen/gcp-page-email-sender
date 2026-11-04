@@ -53,7 +53,11 @@ def main() -> int:
         if fmt == "png":
             body_parts.append(f'<p><img src="cid:{cid}" style="max-width:100%;height:auto;" alt="screenshot" /></p>')
         elif fmt == "html":
-            body_parts.append(f'<p>HTML completo disponível no anexo.</p>')
+            # Embute o HTML completo da página no corpo (truncado a 100k para não exceder limite)
+            html_content = Path(path).read_text(encoding="utf-8")
+            if len(html_content) > 100000:
+                html_content = html_content[:100000] + "\n<!-- truncado -->"
+            body_parts.append(f'<details><summary>HTML completo da página</summary><pre style="white-space:pre-wrap;font-size:12px;">{html_content}</pre></details>')
         attachments.append({"path": path, "inline": True, "content_id": cid, "name": Path(path).name})
 
     # Anexos normais para attachment_formats

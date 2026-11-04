@@ -6,8 +6,8 @@ tasks:
     recipients:
       - ricardo.queen@eneva.com.br
     formats: [png, pdf, html]
-    body_formats: [png]
-    attachment_formats: [pdf, html]
+    body_formats: [png, html]
+    attachment_formats: [pdf]
     render:
       wait_selector: 'text=Margem Bruta'
       wait_end_selector: 'footer, [data-testid="stFooter"]'
