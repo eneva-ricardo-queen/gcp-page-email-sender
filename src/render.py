@@ -12,12 +12,18 @@ def _setup_page(browser, viewport: dict, device_scale_factor: int = 1):
     return context.new_page()
 
 
-def _wait_for_content(page, wait_selector: str, wait_end_selector: str, wait_end_timeout: int):
+def _wait_for_content(page, wait_selector: str, wait_end_selector: str, wait_end_timeout: int,
+                      wait_for_chart: bool = False, chart_timeout: int = 30000):
     if wait_selector:
         page.wait_for_selector(wait_selector, timeout=60000)
     if wait_end_selector:
         try:
             page.wait_for_selector(wait_end_selector, timeout=wait_end_timeout)
+        except Exception:
+            pass
+    if wait_for_chart:
+        try:
+            page.wait_for_selector("canvas, .plotly-graph-div, svg.js-plotly-plot", timeout=chart_timeout)
         except Exception:
             pass
 
@@ -75,7 +81,8 @@ def render_page(url: str, formats: list[str] | None = None,
         browser = p.chromium.launch(headless=True)
         page = _setup_page(browser, viewport, device_scale_factor=rc.get("device_scale_factor", 1))
         page.goto(url, wait_until="networkidle", timeout=120000)
-        _wait_for_content(page, rc["wait_selector"], rc["wait_end_selector"], rc["wait_end_timeout"])
+        _wait_for_content(page, rc["wait_selector"], rc["wait_end_selector"], rc["wait_end_timeout"],
+                          rc.get("wait_for_chart", False), rc.get("chart_timeout", 30000))
         # Validacao: checa se a pagina renderizou (nao e 404/fallback)
         html = page.content()
         validate_text = rc.get("validate_text", "")

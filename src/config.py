@@ -110,6 +110,8 @@ DEFAULT_RENDER = {
     "scroll_steps": 10,
     "scroll_step_px": 500,
     "device_scale_factor": 1,
+    "wait_for_chart": False,
+    "chart_timeout": 30000,
 }
 
 
