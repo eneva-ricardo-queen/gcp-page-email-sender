@@ -1,6 +1,6 @@
 tasks:
   - id: rd-futura
-    url: https://pep.labs.eneva.com.br/rd-futura
+    url: https://pep.labs.eneva.com.br/rdo-futura
     schedule: "0 12 * * *"
     sender: pep@eneva.com.br
     recipients:
