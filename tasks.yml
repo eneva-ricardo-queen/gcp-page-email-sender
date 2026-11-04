@@ -1,6 +1,6 @@
 tasks:
   - id: rd-futura
-    url: https://webapp-pep-856929023451.us-central1.run.app/rd-futura
+    url: https://pep.labs.eneva.com.br/rd-futura
     schedule: "0 12 * * *"
     sender: pep@eneva.com.br
     recipients:
@@ -11,7 +11,7 @@ tasks:
     body_text_before: "Segue o Relatório Diário de Futura referente a {date}."
     body_text_after: "Dúvidas? Contate o time de Portfólio em pep@eneva.com.br."
     render:
-      wait_selector: 'text=Margem Bruta'
+      wait_selector: ''
       validate_text: 'Margem Bruta'
       wait_end_selector: 'footer, [data-testid="stFooter"]'
       wait_end_timeout: 60000

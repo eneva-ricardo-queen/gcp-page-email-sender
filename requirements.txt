@@ -1,6 +1,15 @@
+# Linha para instruir o pip a procurar pacotes no repositório privado
+--extra-index-url https://us-central1-python.pkg.dev/eva-prj-prd-preco-gas-gnl-s9/repo-artefatos-imagens-py-lib-custom/simple/
+gcp-lib==0.0.2
+
+# Renderização headless
 playwright==1.49.0
+Pillow>=10.0.0
+
+# E-mail
 msal>=1.28.0
 requests>=2.31.0
+
+# Config
 PyYAML>=6.0
 python-dotenv>=1.0.0
-Pillow>=10.0.0

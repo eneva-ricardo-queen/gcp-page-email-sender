@@ -1,8 +1,7 @@
-"""Configuração do job: lê tasks.yml e secrets do ambiente/gcloud."""
+"""Configuração do job: lê tasks.yml e secrets via gcp-lib (SecretManager)."""
 
 import os
 import json
-import subprocess
 import yaml
 from pathlib import Path
 
@@ -24,51 +23,43 @@ def get_task(task_id: str) -> dict:
     raise ValueError(f"Task '{task_id}' not found in tasks.yml")
 
 
-def _gcloud_secret(secret_id: str) -> str | None:
-    try:
-        out = subprocess.run(
-            ["gcloud", "secrets", "versions", "access", "latest",
-             f"--secret={secret_id}", f"--project={PROJECT_ID}"],
-            capture_output=True, text=True, timeout=30,
-        )
-        if out.returncode == 0 and out.stdout.strip():
-            return out.stdout.strip()
-    except Exception:
-        pass
-    return None
+def get_url(task: dict) -> str:
+    """URL da página: override via env APP_URL (deploy) ou default do tasks.yml (local)."""
+    return os.environ.get("APP_URL", task.get("url", ""))
 
 
-def _secret_id_for(attr: str) -> str | None:
+# SecretManager instance (lazy, reutilizado)
+_sm = None
+
+
+def _get_sm():
+    global _sm
+    if _sm is not None:
+        return _sm
     try:
-        cfg = yaml.safe_load(open(ROOT / "config.yml"))
-        for sd in cfg.get("secrets", []):
-            if sd.get("attr_name") == attr:
-                return sd["secret_id"]
-    except Exception:
-        pass
-    return None
+        from gcp.secret_manager import SecretManager
+        _sm = SecretManager(project_id=PROJECT_ID, config_file_path=str(ROOT / "config.yml"))
+        _sm.load_secrets()
+    except Exception as e:
+        print(f"[config] SecretManager failed: {e}")
+        _sm = None
+    return _sm
 
 
 def secret(name: str, attr: str | None = None) -> str:
-    """Lê secret do env ou via gcloud CLI."""
+    """Lê secret do env (local) ou via gcp-lib SecretManager (prod)."""
+    # 1. env (local)
     val = os.environ.get(name)
     if val:
         return val
-    v = _gcloud_secret(name)
-    if v:
-        return v
-    if attr:
-        sid = _secret_id_for(attr)
-        if sid:
-            v = _gcloud_secret(sid)
-            if v:
-                return v
-    sid = _secret_id_for(name.lower())
-    if sid:
-        v = _gcloud_secret(sid)
+    # 2. gcp-lib SecretManager
+    sm = _get_sm()
+    if sm is not None:
+        key = attr or name.lower()
+        v = getattr(sm, key, None)
         if v:
             return v
-    raise RuntimeError(f"Secret '{name}' not found in env nor gcloud")
+    raise RuntimeError(f"Secret '{name}' not found in env nor SecretManager")
 
 
 def get_sender(task: dict) -> str:

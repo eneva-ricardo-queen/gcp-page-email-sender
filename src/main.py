@@ -59,7 +59,7 @@ def main() -> int:
     args = parser.parse_args()
 
     task = get_task(args.task)
-    url = task["url"]
+    url = get_url(task)
     formats = task.get("formats", ["png"])
     render_config = get_render_config(task)
     subject_tpl = task.get("subject_template", "{id} — {date}")

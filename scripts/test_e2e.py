@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-pep-dashboard")
 
-from config import get_task, get_sender, get_recipients, get_body_formats, get_attachment_formats, get_render_config, secret
+from config import get_task, get_sender, get_recipients, get_url, get_body_formats, get_attachment_formats, get_render_config, secret
 from render import render_page
 import importlib.util
 spec = importlib.util.spec_from_file_location("main_mod", "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender/src/main.py")
@@ -20,7 +20,7 @@ _build_attachments = main_mod._build_attachments
 task = get_task("rd-futura")
 sender = get_sender(task)
 recipients = get_recipients(task)
-url = task["url"]
+url = get_url(task)
 render_config = get_render_config(task)
 
 print(f"Rendering {url} ...")
