@@ -13,8 +13,4 @@ tasks:
       wait_end_selector: 'footer, [data-testid="stFooter"]'
       wait_end_timeout: 30000
       extra_seconds: 5
-      viewport_width: 1920
-      viewport_height: 8000
-      scroll_steps: 10
-      scroll_step_px: 500
     subject_template: "RDO Futura — {date}"

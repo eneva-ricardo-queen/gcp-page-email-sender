@@ -19,11 +19,9 @@ body_formats = get_body_formats(task)
 attachment_formats = get_attachment_formats(task)
 url = task["url"]
 render_config = get_render_config(task)
-wait_selector = render_config.get("wait_selector", "")
-extra = render_config.get("extra_seconds", 3)
 
 print(f"Rendering {url} ...")
-result = render_page(url, wait_selector, extra, task.get("formats", []), render_config=render_config)
+result = render_page(url, task.get("formats", []), render_config=render_config)
 files = result["files"]
 print("Captured:", files)
 

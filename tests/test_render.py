@@ -25,5 +25,5 @@ def test_render_page_signature():
 @pytest.mark.skipif(True, reason="chromium not available in CI/local; run manually")
 def test_render_smoke():
     from render import render_page
-    result = render_page("https://www.google.com", wait_selector="", extra_seconds=1, formats=["png"])
+    result = render_page("https://www.google.com", formats=["png"])
     assert "png" in result["files"]

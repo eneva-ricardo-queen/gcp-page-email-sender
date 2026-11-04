@@ -4,8 +4,6 @@ import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-DEFAULT_VIEWPORT = {"width": 1920, "height": 4000}
-
 
 def _setup_page(browser, viewport: dict):
     context = browser.new_context(viewport=viewport)
@@ -19,7 +17,7 @@ def _wait_for_content(page, wait_selector: str, wait_end_selector: str, wait_end
         try:
             page.wait_for_selector(wait_end_selector, timeout=wait_end_timeout)
         except Exception:
-            pass  # continua mesmo se não aparecer
+            pass
 
 
 def _scroll_to_load(page, steps: int, step_px: int):
@@ -34,34 +32,31 @@ def _scroll_to_load(page, steps: int, step_px: int):
 def _capture(page, base: Path, formats: list[str]) -> dict[str, str]:
     files = {}
     if "png" in formats:
-        png = f"{base}.png"
-        page.screenshot(path=png, full_page=True)
-        files["png"] = png
+        page.screenshot(path=f"{base}.png", full_page=True)
+        files["png"] = f"{base}.png"
     if "pdf" in formats:
-        pdf = f"{base}.pdf"
-        page.pdf(path=pdf, format="A4", print_background=True)
-        files["pdf"] = pdf
+        page.pdf(path=f"{base}.pdf", format="A4", print_background=True)
+        files["pdf"] = f"{base}.pdf"
     if "html" in formats:
-        html = f"{base}.html"
-        Path(html).write_text(page.content(), encoding="utf-8")
-        files["html"] = html
+        Path(f"{base}.html").write_text(page.content(), encoding="utf-8")
+        files["html"] = f"{base}.html"
     return files
 
 
-def render_page(url: str, wait_selector: str = "", extra_seconds: int = 3,
-                formats: list[str] | None = None,
+def render_page(url: str, formats: list[str] | None = None,
                 render_config: dict | None = None) -> dict:
     formats = formats or ["png"]
     rc = render_config or {}
     viewport = {
-        "width": rc.get("viewport_width", DEFAULT_VIEWPORT["width"]),
-        "height": rc.get("viewport_height", DEFAULT_VIEWPORT["height"]),
+        "width": rc.get("viewport_width", 1920),
+        "height": rc.get("viewport_height", 4000),
     }
+    wait_selector = rc.get("wait_selector", "")
     wait_end_selector = rc.get("wait_end_selector", "")
     wait_end_timeout = rc.get("wait_end_timeout", 15000)
     scroll_steps = rc.get("scroll_steps", 10)
     scroll_step_px = rc.get("scroll_step_px", 500)
-    extra = rc.get("extra_seconds", extra_seconds)
+    extra = rc.get("extra_seconds", 3)
 
     out_dir = Path(os.environ.get("OUTPUT_DIR", "/tmp"))
     out_dir.mkdir(parents=True, exist_ok=True)
