@@ -81,8 +81,6 @@ def render_page(url: str, formats: list[str] | None = None,
         validate_text = rc.get("validate_text", "")
         if validate_text and validate_text not in html:
             raise RuntimeError(f"Page did not render correctly (missing '{validate_text}'): {url}")
-        if "You need to enable JavaScript" in html and (not validate_text or validate_text not in html):
-            raise RuntimeError(f"Page did not render correctly (JS not loaded): {url}")
         _scroll_to_load(page, rc["scroll_steps"], rc["scroll_step_px"])
         page.wait_for_timeout(rc["extra_seconds"] * 1000)
         results["files"] = _capture(page, base, formats)

@@ -49,6 +49,11 @@ def test_body_and_attachment_formats():
     assert "pdf" in get_attachment_formats(t)
 
 
+def test_body_formats_default():
+    t = get_task("rd-futura")
+    assert get_body_formats(t) == ["png"]
+
+
 def test_get_render_config():
     t = get_task("rd-futura")
     rc = get_render_config(t)

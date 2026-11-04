@@ -1,21 +1,21 @@
 tasks:
   - id: rd-futura
-    url: https://pep.labs.eneva.com.br/rdo-futura
+    url: https://pep.labs.eneva.com.br/rd-futura
     schedule: "0 12 * * *"
     sender: pep@eneva.com.br
     recipients:
       - ricardo.queen@eneva.com.br
     formats: [png, pdf, html]
-    body_formats: [png, html]
-    attachment_formats: [pdf]
+    body_formats: [png]
+    attachment_formats: [pdf, html]
     body_text_before: "Segue a página {id} referente a {date}."
     body_text_after: "Anexo: PDF + HTML. Dúvidas? Contate o time de dados."
     render:
-      wait_selector: '[data-testid="stAppViewContainer"]'
+      wait_selector: 'text=Margem Bruta'
+      validate_text: 'Margem Bruta'
       wait_end_selector: 'footer, [data-testid="stFooter"]'
       wait_end_timeout: 30000
       extra_seconds: 5
-      validate_text: 'Margem Bruta'
       viewport_height: 2000
       device_scale_factor: 2
     subject_template: "RDO Futura — {date}"
