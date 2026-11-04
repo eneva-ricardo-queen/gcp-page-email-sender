@@ -6,8 +6,15 @@ tasks:
     recipients:
       - ricardo.queen@eneva.com.br
     formats: [png, pdf, html]
-    body_formats: [png]              # o que vai no corpo do e-mail (inline)
-    attachment_formats: [pdf, html]  # o que vai como anexo
-    wait_selector: 'text=Margem Bruta'
-    wait_extra_seconds: 5
+    body_formats: [png]
+    attachment_formats: [pdf, html]
+    render:
+      wait_selector: 'text=Margem Bruta'
+      wait_end_selector: 'footer, [data-testid="stFooter"]'
+      wait_end_timeout: 30000
+      extra_seconds: 5
+      viewport_width: 1920
+      viewport_height: 8000
+      scroll_steps: 10
+      scroll_step_px: 500
     subject_template: "RDO Futura — {date}"

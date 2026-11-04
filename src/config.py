@@ -96,3 +96,21 @@ def get_body_formats(task: dict) -> list[str]:
 
 def get_attachment_formats(task: dict) -> list[str]:
     return task.get("attachment_formats", [])
+
+
+DEFAULT_RENDER = {
+    "wait_selector": "",
+    "wait_end_selector": "",
+    "wait_end_timeout": 15000,
+    "extra_seconds": 3,
+    "viewport_width": 1920,
+    "viewport_height": 4000,
+    "scroll_steps": 10,
+    "scroll_step_px": 500,
+}
+
+
+def get_render_config(task: dict) -> dict:
+    cfg = dict(DEFAULT_RENDER)
+    cfg.update(task.get("render") or {})
+    return cfg

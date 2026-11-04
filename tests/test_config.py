@@ -6,9 +6,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from config import load_tasks, get_task, get_sender, get_recipients, get_body_formats, get_attachment_formats
+from config import (load_tasks, get_task, get_sender, get_recipients,
+                    get_body_formats, get_attachment_formats, get_render_config,
+                    DEFAULT_RENDER)
 
-REQUIRED_FIELDS = {"id", "url", "schedule", "sender", "recipients", "formats", "wait_selector"}
+REQUIRED_FIELDS = {"id", "url", "schedule", "sender", "recipients", "formats"}
 
 
 def test_tasks_loads():
@@ -45,6 +47,21 @@ def test_body_and_attachment_formats():
     t = get_task("rdo-futura")
     assert "png" in get_body_formats(t)
     assert "pdf" in get_attachment_formats(t)
+
+
+def test_get_render_config():
+    t = get_task("rdo-futura")
+    rc = get_render_config(t)
+    assert rc["viewport_height"] == 8000
+    assert rc["wait_end_timeout"] == 30000
+    # defaults applied
+    assert rc["scroll_steps"] == 10
+
+
+def test_get_render_config_defaults():
+    t = {"id": "x", "url": "https://example.com"}
+    rc = get_render_config(t)
+    assert rc == DEFAULT_RENDER
 
 
 def test_get_task_missing_raises():

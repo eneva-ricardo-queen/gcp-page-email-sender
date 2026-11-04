@@ -9,7 +9,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from config import (get_task, get_sender, get_recipients,
-                    get_body_formats, get_attachment_formats)
+                    get_body_formats, get_attachment_formats,
+                    get_render_config)
 from render import render_page
 from mail import send_mail
 
@@ -22,15 +23,16 @@ def main() -> int:
     task = get_task(args.task)
     url = task["url"]
     formats = task.get("formats", ["png"])
-    wait_selector = task.get("wait_selector", "")
-    extra = task.get("wait_extra_seconds", 3)
+    render_config = get_render_config(task)
+    wait_selector = render_config.get("wait_selector", "")
+    extra = render_config.get("extra_seconds", 3)
     subject_tpl = task.get("subject_template", "{id} — {date}")
     date_str = datetime.now().strftime("%Y-%m-%d")
     body_formats = get_body_formats(task)
     attachment_formats = get_attachment_formats(task)
 
     print(f"[{task['id']}] rendering {url}")
-    result = render_page(url, wait_selector, extra, formats)
+    result = render_page(url, wait_selector, extra, formats, render_config=render_config)
     files = result["files"]
     print(f"[{task['id']}] captured: {files}")
 
@@ -86,5 +88,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-PYEOF
-cd /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender && echo "written"

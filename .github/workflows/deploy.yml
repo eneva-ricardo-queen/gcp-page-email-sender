@@ -97,6 +97,6 @@ jobs:
           echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
 
       - name: "Deploy: page-email-sender (RDO Futura)"
-        run: ./.github/scripts/deploy-job.sh job-page-email-sender 300 2Gi 2 "--task,rdo-futura" "0 12 * * *"
+        run: ./.github/scripts/deploy-job.sh job-page-email-sender 600 2Gi 2 "--task,rdo-futura" "0 12 * * *"
 PYEOF
 cd /home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender && echo "created" && ls .github/workflows .github/scripts

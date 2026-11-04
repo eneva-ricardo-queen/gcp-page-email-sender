@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-pep-dashboard")
 
-from config import get_task, get_sender, get_recipients, get_body_formats, get_attachment_formats, secret
+from config import (get_task, get_sender, get_recipients, get_body_formats,
+                    get_attachment_formats, get_render_config, secret)
 from render import render_page
 
 task = get_task("rdo-futura")
@@ -17,9 +18,12 @@ recipients = get_recipients(task)
 body_formats = get_body_formats(task)
 attachment_formats = get_attachment_formats(task)
 url = task["url"]
+render_config = get_render_config(task)
+wait_selector = render_config.get("wait_selector", "")
+extra = render_config.get("extra_seconds", 3)
 
 print(f"Rendering {url} ...")
-result = render_page(url, task["wait_selector"], task["wait_extra_seconds"], task.get("formats", []))
+result = render_page(url, wait_selector, extra, task.get("formats", []), render_config=render_config)
 files = result["files"]
 print("Captured:", files)
 
