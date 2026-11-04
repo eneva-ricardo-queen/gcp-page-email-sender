@@ -17,7 +17,7 @@ spec.loader.exec_module(main_mod)
 _build_body = main_mod._build_body
 _build_attachments = main_mod._build_attachments
 
-task = get_task("rdo-futura")
+task = get_task("rd-futura")
 sender = get_sender(task)
 recipients = get_recipients(task)
 url = task["url"]

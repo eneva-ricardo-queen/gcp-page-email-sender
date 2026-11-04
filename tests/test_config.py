@@ -32,25 +32,25 @@ def test_task_ids_unique():
 
 
 def test_get_task():
-    t = get_task("rdo-futura")
-    assert t["id"] == "rdo-futura"
+    t = get_task("rd-futura")
+    assert t["id"] == "rd-futura"
     assert t["url"].startswith("https://")
 
 
 def test_get_sender_recipients():
-    t = get_task("rdo-futura")
+    t = get_task("rd-futura")
     assert "@" in get_sender(t)
     assert all("@" in r for r in get_recipients(t))
 
 
 def test_body_and_attachment_formats():
-    t = get_task("rdo-futura")
+    t = get_task("rd-futura")
     assert "png" in get_body_formats(t)
     assert "pdf" in get_attachment_formats(t)
 
 
 def test_get_render_config():
-    t = get_task("rdo-futura")
+    t = get_task("rd-futura")
     rc = get_render_config(t)
     assert rc["viewport_height"] == 2000
     assert rc["wait_end_timeout"] == 30000
