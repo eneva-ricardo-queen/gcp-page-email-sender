@@ -9,27 +9,37 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from config import (get_task, get_sender, get_recipients,
                     get_body_formats, get_attachment_formats,
+                    get_body_text_before, get_body_text_after,
                     get_render_config)
 from render import render_page
 from mail import send_mail
 
 
-def _build_body(task: dict, date_str: str, files: dict, body_formats: list[str]) -> str:
-    parts = [f"<p>Segue a página <b>{task['id']}</b> referente a {date_str}.</p>"]
+def _build_body(task: dict, date_str: str, files: dict) -> str:
+    before = get_body_text_before(task).format(id=task["id"], date=date_str)
+    after = get_body_text_after(task).format(id=task["id"], date=date_str)
+    body_formats = get_body_formats(task)
+
+    parts = [f"<p>{before}</p>"]
     for fmt in body_formats:
         if fmt not in files:
             continue
+        path = files[fmt]
         if fmt == "png":
             parts.append(f'<p><img src="cid:inline_{fmt}" style="max-width:100%;height:auto;" alt="screenshot" /></p>')
         elif fmt == "html":
-            content = Path(files[fmt]).read_text(encoding="utf-8")
-            if len(content) > 100000:
-                content = content[:100000] + "\n<!-- truncado -->"
-            parts.append(f'<details><summary>HTML completo da página</summary><pre style="white-space:pre-wrap;font-size:12px;">{content}</pre></details>')
+            html_content = Path(path).read_text(encoding="utf-8")
+            if len(html_content) > 100000:
+                html_content = html_content[:100000] + "\n<!-- truncado -->"
+            parts.append(f'<details><summary>HTML completo da página</summary><pre style="white-space:pre-wrap;font-size:12px;">{html_content}</pre></details>')
+    if after:
+        parts.append(f"<p>{after}</p>")
     return "\n".join(parts)
 
 
-def _build_attachments(files: dict, body_formats: list[str], attachment_formats: list[str]) -> list[dict]:
+def _build_attachments(task: dict, files: dict) -> list[dict]:
+    body_formats = get_body_formats(task)
+    attachment_formats = get_attachment_formats(task)
     attachments = []
     seen = set()
     for fmt in body_formats:
@@ -54,16 +64,14 @@ def main() -> int:
     render_config = get_render_config(task)
     subject_tpl = task.get("subject_template", "{id} — {date}")
     date_str = datetime.now().strftime("%Y-%m-%d")
-    body_formats = get_body_formats(task)
-    attachment_formats = get_attachment_formats(task)
 
     print(f"[{task['id']}] rendering {url}")
     result = render_page(url, formats, render_config=render_config)
     files = result["files"]
     print(f"[{task['id']}] captured: {files}")
 
-    body_html = _build_body(task, date_str, files, body_formats)
-    attachments = _build_attachments(files, body_formats, attachment_formats)
+    body_html = _build_body(task, date_str, files)
+    attachments = _build_attachments(task, files)
 
     sender = get_sender(task)
     recipients = get_recipients(task)

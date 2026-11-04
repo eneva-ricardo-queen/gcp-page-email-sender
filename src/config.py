@@ -51,22 +51,18 @@ def _secret_id_for(attr: str) -> str | None:
 
 def secret(name: str, attr: str | None = None) -> str:
     """Lê secret do env ou via gcloud CLI."""
-    # 1. env (local)
     val = os.environ.get(name)
     if val:
         return val
-    # 2. gcloud CLI direto
     v = _gcloud_secret(name)
     if v:
         return v
-    # 3. mapear attr -> secret_id -> gcloud
     if attr:
         sid = _secret_id_for(attr)
         if sid:
             v = _gcloud_secret(sid)
             if v:
                 return v
-    # 4. mapear name -> secret_id -> gcloud
     sid = _secret_id_for(name.lower())
     if sid:
         v = _gcloud_secret(sid)
@@ -76,10 +72,7 @@ def secret(name: str, attr: str | None = None) -> str:
 
 
 def get_sender(task: dict) -> str:
-    s = task.get("sender")
-    if not s:
-        raise ValueError("task missing 'sender'")
-    return s
+    return task.get("sender") or (_ for _ in ()).throw(ValueError("task missing 'sender'"))
 
 
 def get_recipients(task: dict) -> list[str]:
@@ -97,6 +90,14 @@ def get_body_formats(task: dict) -> list[str]:
 
 def get_attachment_formats(task: dict) -> list[str]:
     return task.get("attachment_formats", [])
+
+
+def get_body_text_before(task: dict) -> str:
+    return task.get("body_text_before", "Segue a página {id} referente a {date}.")
+
+
+def get_body_text_after(task: dict) -> str:
+    return task.get("body_text_after", "")
 
 
 DEFAULT_RENDER = {

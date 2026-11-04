@@ -52,7 +52,7 @@ def test_body_and_attachment_formats():
 def test_get_render_config():
     t = get_task("rdo-futura")
     rc = get_render_config(t)
-    assert rc["viewport_height"] == 4000
+    assert rc["viewport_height"] == 2000
     assert rc["wait_end_timeout"] == 30000
     # defaults applied
     assert rc["scroll_steps"] == 10
