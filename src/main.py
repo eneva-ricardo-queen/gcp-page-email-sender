@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from config import (get_task, get_sender, get_recipients, secret,
+from config import (get_task, get_sender, get_recipients, secret, get_url,
                     get_body_formats, get_attachment_formats,
                     get_body_text_before, get_body_text_after,
                     get_render_config)

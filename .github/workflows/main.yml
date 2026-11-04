@@ -56,6 +56,11 @@ jobs:
             --extra-index-url "https://oauth2accesstoken:${GCLOUD_TOKEN}@${{ env.PYTHON_REPO_URL }}/simple/repo-artefatos-imagens-py-lib-custom" \
             -r requirements.txt
 
+      - name: Lint (undefined names)
+        run: |
+          pip install ruff
+          ruff check src/ --select F821
+
   deploy:
     name: Build, Push and Deploy to Cloud Run Jobs
     needs: validate
@@ -97,4 +102,4 @@ jobs:
           echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
 
       - name: "Deploy: page-email-sender (RDO Futura)"
-        run: ./.github/scripts/deploy-job.sh job-page-email-sender 600 2Gi 2 "--task,rd-futura" "0 12 * * *"
+        run: bash ./.github/scripts/deploy-job.sh job-page-email-sender 600 2Gi 2 "--task,rd-futura" "0 12 * * *"
