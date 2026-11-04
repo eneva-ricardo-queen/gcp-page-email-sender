@@ -15,7 +15,7 @@ SCHEDULE="${6:-}"
 : "${IMAGE_URL:?IMAGE_URL obrigatorio (build da imagem)}"
 : "${CLOUD_RUN_REGION:?}"
 : "${GCP_PROJECT_ID:?}"
-: "${CLOUD_RUN_SERVICE_ACCOUNT_EMAIL:?}"
+: "${GCP_SERVICE_ACCOUNT_EMAIL:?}"
 : "${VPC_HOST_PROJECT_ID:?}"
 : "${VPC_CONNECTOR_NAME:?}"
 
@@ -32,7 +32,7 @@ if gcloud run jobs describe "${JOB}" --region "${CLOUD_RUN_REGION}" --project "$
     --memory "${MEMORY}" \
     --args="${ARGS}" \
     --vpc-connector="${VPC_CONNECTOR}" \
-    --service-account="${CLOUD_RUN_SERVICE_ACCOUNT_EMAIL}" \
+    --service-account="${GCP_SERVICE_ACCOUNT_EMAIL}" \
     --region "${CLOUD_RUN_REGION}" \
     --project "${GCP_PROJECT_ID}" \
     --quiet
@@ -46,14 +46,14 @@ else
     --memory "${MEMORY}" \
     --args="${ARGS}" \
     --vpc-connector="${VPC_CONNECTOR}" \
-    --service-account="${CLOUD_RUN_SERVICE_ACCOUNT_EMAIL}" \
+    --service-account="${GCP_SERVICE_ACCOUNT_EMAIL}" \
     --region "${CLOUD_RUN_REGION}" \
     --project "${GCP_PROJECT_ID}" \
     --quiet
 fi
 
 gcloud run jobs add-iam-policy-binding "${JOB}" \
-  --member="serviceAccount:${CLOUD_RUN_SERVICE_ACCOUNT_EMAIL}" \
+  --member="serviceAccount:${GCP_SERVICE_ACCOUNT_EMAIL}" \
   --role="roles/run.invoker" \
   --region="${CLOUD_RUN_REGION}" \
   --project="${GCP_PROJECT_ID}"
@@ -69,7 +69,7 @@ if [ -n "${SCHEDULE}" ]; then
       --time-zone="${SCHEDULER_TIME_ZONE}" \
       --uri="${URL}" \
       --http-method=POST \
-      --oauth-service-account-email="${CLOUD_RUN_SERVICE_ACCOUNT_EMAIL}" \
+      --oauth-service-account-email="${GCP_SERVICE_ACCOUNT_EMAIL}" \
       --location="${CLOUD_RUN_REGION}" \
       --project="${GCP_PROJECT_ID}" \
       --quiet
@@ -79,7 +79,7 @@ if [ -n "${SCHEDULE}" ]; then
       --time-zone="${SCHEDULER_TIME_ZONE}" \
       --uri="${URL}" \
       --http-method=POST \
-      --oauth-service-account-email="${CLOUD_RUN_SERVICE_ACCOUNT_EMAIL}" \
+      --oauth-service-account-email="${GCP_SERVICE_ACCOUNT_EMAIL}" \
       --location="${CLOUD_RUN_REGION}" \
       --project="${GCP_PROJECT_ID}" \
       --quiet
