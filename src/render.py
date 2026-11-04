@@ -28,6 +28,32 @@ def _wait_for_content(page, wait_selector: str, wait_end_selector: str, wait_end
             pass
 
 
+def _dismiss_dialogs(page, dialog_text: str):
+    """Remove overlays/dialog do Streamlit cujo texto contenha `dialog_text`.
+
+    Usado para fechar o pop-up 'Page not found' que o st.navigation (position
+    hidden) às vezes exibe sobre a página já renderizada. Só age se dialog_text
+    vier configurado; não remove dialogs legítimos cujo texto não bate.
+    """
+    if not dialog_text:
+        return
+    page.evaluate(_DISMISS_JS, dialog_text)
+
+
+_DISMISS_JS = r"""
+(text) => {
+  const sels = ['[data-testid="stDialog"]', '[role="dialog"]'];
+  for (const s of sels) {
+    document.querySelectorAll(s).forEach((el) => {
+      if (text && !(el.innerText || '').includes(text)) return;
+      el.remove();
+    });
+  }
+  document.querySelectorAll('[data-baseweb="modal"]').forEach((el) => el.remove());
+}
+"""
+
+
 def _scroll_to_load(page, steps: int, step_px: int):
     for _ in range(steps):
         page.evaluate(f"window.scrollBy(0, {step_px})")
@@ -83,6 +109,8 @@ def render_page(url: str, formats: list[str] | None = None,
         page.goto(url, wait_until="networkidle", timeout=120000)
         _wait_for_content(page, rc["wait_selector"], rc["wait_end_selector"], rc["wait_end_timeout"],
                           rc.get("wait_for_chart", False), rc.get("chart_timeout", 30000))
+        # Fecha overlays 'Page not found' que o st.navigation pode exibir sobre a página
+        _dismiss_dialogs(page, rc.get("dismiss_dialog_text", ""))
         # Validacao: checa se a pagina renderizou (nao e 404/fallback)
         html = page.content()
         validate_text = rc.get("validate_text", "")

@@ -69,6 +69,20 @@ def test_get_render_config_defaults():
     assert rc == DEFAULT_RENDER
 
 
+def test_dismiss_dialog_text_configurable():
+    t = {"render": {"dismiss_dialog_text": "Page not found"}}
+    rc = get_render_config(t)
+    assert rc["dismiss_dialog_text"] == "Page not found"
+
+
+def test_render_wires_dismiss_before_capture():
+    """Garante que o dismiss roda ANTES da captura (senão o pop-up sai no print)."""
+    render_src = (Path(__file__).resolve().parents[1] / "src" / "render.py").read_text(encoding="utf-8")
+    assert "_dismiss_dialogs(" in render_src
+    # a chamada deve vir antes da atribuição de results["files"] = _capture
+    assert render_src.index("_dismiss_dialogs(") < render_src.index("_capture(page, base, formats)")
+
+
 def test_get_task_missing_raises():
     try:
         get_task("nonexistent")

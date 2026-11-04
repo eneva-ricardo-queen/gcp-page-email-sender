@@ -103,6 +103,7 @@ DEFAULT_RENDER = {
     "device_scale_factor": 1,
     "wait_for_chart": False,
     "chart_timeout": 30000,
+    "dismiss_dialog_text": "",
 }
 
 
