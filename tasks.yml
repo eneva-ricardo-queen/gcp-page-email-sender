@@ -4,6 +4,10 @@ tasks:
     schedule: "0 12 * * *"
     sender: pep@eneva.com.br
     recipients:
+      - marcos.vinicius@eneva.com.br
+      - katarine.melo@eneva.com.br
+      - joao.rafael@eneva.com.br
+      - felipe.nazare@eneva.com.br
       - ricardo.queen@eneva.com.br
     formats: [png, pdf]
     body_formats: [png]
