@@ -17,7 +17,7 @@ tasks:
     render:
       wait_selector: ''
       validate_text: 'Margem Bruta'
-      wait_end_selector: 'footer, [data-testid="stFooter"]'
+      wait_end_selector: 'text=Desenvolvido pelo Time de Preço e Portfólio'
       wait_end_timeout: 60000
       extra_seconds: 30
       wait_for_chart: true
