@@ -27,7 +27,7 @@ Sem chromium local, o render falha com mensagem clara.
 ## Deploy
 ```bash
 docker build -t gcp-page-email-sender:local -f Dockerfile .
-# Cloud Run Job + Cloud Scheduler (ver PLANO-RDO-EMAIL.md em analise-futura)
+# Cloud Run Job + Cloud Scheduler (ver workspace-rq/planos/PLANO-RDO-EMAIL.md)
 ```
 
 ## Adicionar nova tarefa

@@ -25,4 +25,4 @@ tasks:
       dismiss_dialog_text: 'Page not found'
       viewport_height: 2000
       device_scale_factor: 2
-    subject_template: "RDO Futura — {date}"
+    subject_template: "Relatório Diário Futura — {date}"
