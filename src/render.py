@@ -28,15 +28,30 @@ def _wait_for_content(page, wait_selector: str, wait_end_selector: str, wait_end
     if wait_selector:
         page.wait_for_selector(wait_selector, timeout=60000)
     if wait_end_selector:
+        # Nao engole o timeout: se o fim da pagina nao aparecer, a pagina nao
+        # terminou de renderizar — melhor o job falhar do que capturar cortado.
         try:
             page.wait_for_selector(wait_end_selector, timeout=wait_end_timeout)
-        except Exception:
-            pass
+        except Exception as exc:
+            raise RuntimeError(
+                f"Fim da pagina nao encontrado (wait_end_selector={wait_end_selector!r}) "
+                f"dentro de {wait_end_timeout}ms: a pagina nao terminou de renderizar."
+            ) from exc
     if wait_for_chart:
+        # A div real do plotly no Streamlit e `.js-plotly-plot` (sem
+        # `plotly-graph-div`); esperar so a div nao basta — a figura desenha
+        # depois, entao conferimos que ja tem SVG (paths) antes de seguir.
         try:
-            page.wait_for_selector("canvas, .plotly-graph-div, svg.js-plotly-plot", timeout=chart_timeout)
-        except Exception:
-            pass
+            page.wait_for_function(
+                """() => [...document.querySelectorAll('.js-plotly-plot')].some(
+                    el => (el.querySelector('svg')?.children.length ?? 0) > 0
+                )""",
+                timeout=chart_timeout,
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                f"Grafico nao desenhou (wait_for_chart) dentro de {chart_timeout}ms."
+            ) from exc
 
 
 def _dismiss_dialogs(page, dialog_text: str):
@@ -160,6 +175,53 @@ def _assert_fits(page) -> None:
         )
 
 
+def _assert_ready_to_capture(page, wait_end_selector: str, chart_required: bool) -> None:
+    """Sanity pre-capture: pagina terminou de renderizar (fail loud, sem email quebrado).
+
+    Tres verificacoes independentes, cada uma suficiente para detectar um
+    render parcial (que passou pelas esperas anteriores mas ainda nao terminou):
+      1. Rodape dentro da area capturada (bottom <= altura do conteudo) — o
+         rodape e o ultimo elemento da pagina; se nao esta la, o script parou.
+      2. Grafico desenhado (se `chart_required`): `.js-plotly-plot` com SVG.
+      3. Conteudo estavel: scrollHeight inalterado em 1s (evita capturar no
+         meio de um reflow pos-resize ou de um render em andamento).
+    """
+    # 1. rodape
+    footer_bottom = page.evaluate("""() => {
+        const els = [...document.querySelectorAll('p')];
+        const f = els.find(e => (e.textContent || '').includes('Desenvolvido pelo Time de Preço'));
+        if (!f) return -1;
+        const r = f.getBoundingClientRect();
+        const main = document.querySelector('[data-testid="stMain"]');
+        const offset = main ? main.scrollTop : 0;
+        return Math.round(r.bottom + offset);
+    }""")
+    if footer_bottom < 0:
+        raise RuntimeError("Rodape da pagina nao encontrado: pagina nao terminou de renderizar.")
+    content = _content_height(page)
+    if footer_bottom > content + 2:
+        raise RuntimeError(
+            f"Rodape (y={footer_bottom}) fora da area capturada (conteudo={content}): "
+            "capturaria cortada."
+        )
+    # 2. grafico (se obrigatorio)
+    if chart_required:
+        has_chart = page.evaluate("""() => {
+            const plots = document.querySelectorAll('.js-plotly-plot');
+            return [...plots].some(el => (el.querySelector('svg')?.children.length ?? 0) > 0);
+        }""")
+        if not has_chart:
+            raise RuntimeError("Grafico nao desenhado: pagina nao terminou de renderizar.")
+    # 3. estabilidade: scrollHeight nao muda em 1s
+    h1 = _content_height(page)
+    page.wait_for_timeout(1000)
+    h2 = _content_height(page)
+    if h1 != h2:
+        raise RuntimeError(
+            f"Conteudo ainda crescendo ({h1}px -> {h2}px): pagina nao estabilizou."
+        )
+
+
 def _capture(page, base: Path, formats: list[str]) -> dict[str, str]:
     files = {}
     if "png" in formats:
@@ -222,6 +284,7 @@ def render_page(url: str, formats: list[str] | None = None,
             page, viewport, rc.get("device_scale_factor", 1)
         )
         _assert_fits(page)
+        _assert_ready_to_capture(page, rc.get("wait_end_selector", ""), rc.get("wait_for_chart", False))
         results["files"] = _capture(page, base, formats)
         browser.close()
     return results

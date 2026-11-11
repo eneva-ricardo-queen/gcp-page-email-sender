@@ -58,7 +58,7 @@ def test_get_render_config():
     t = get_task("rd-futura")
     rc = get_render_config(t)
     assert rc["viewport_height"] == 2000
-    assert rc["wait_end_timeout"] == 60000
+    assert rc["wait_end_timeout"] == 180000
     # defaults applied
     assert rc["scroll_steps"] == 10
 
