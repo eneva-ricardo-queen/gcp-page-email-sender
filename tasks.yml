@@ -13,12 +13,12 @@ tasks:
     body_formats: [png]
     attachment_formats: [pdf]
     body_text_before: "Segue o Relatório Diário de Futura referente a {date}."
-    body_text_after: "Dúvidas? Contate o time de Portfólio em pep@eneva.com.br."
+    body_text_after: "Dúvidas? Contate pep@eneva.com.br."
     render:
       wait_selector: ''
       validate_text: 'Margem Bruta'
       wait_end_selector: 'text=Desenvolvido pelo Time de Preço e Portfólio'
-      wait_end_timeout: 60000
+      wait_end_timeout: 180000
       extra_seconds: 30
       wait_for_chart: true
       chart_timeout: 30000
