@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT.parent / "gcp-pep-dashboard"))
 from config import get_task, get_sender, get_recipients, get_url, get_body_formats, get_attachment_formats, get_render_config, secret
 from render import render_page
 import importlib.util
-spec = importlib.util.spec_from_file_location("main_mod", "str(ROOT / "src" / "main.py")")
+spec = importlib.util.spec_from_file_location("main_mod", str(ROOT / "src" / "main.py"))
 main_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(main_mod)
 _build_body = main_mod._build_body
