@@ -16,17 +16,16 @@ ENV PATH="/opt/venv/bin:${PATH}"
 WORKDIR /app
 COPY requirements.txt .
 
-# Argumento que recebe o CONTEÚDO do arquivo de credenciais (injetado pelo Actions)
-ARG GCLOUD_KEY_CONTENT
-
-RUN echo "${GCLOUD_KEY_CONTENT}" > /tmp/gcloud-key.json && \
-    gcloud auth login --cred-file=/tmp/gcloud-key.json --quiet && \
-    gcloud config set project eva-prj-prd-preco-gas-gnl-s9 --quiet && \
-    export GCLOUD_TOKEN=$(gcloud auth print-access-token) && \
+# Credenciais fornecidas via Workload Identity / secret mount em build (ver README).
+# Espera-se GCLOUD_TOKEN no ambiente de build ou um secret montado em /run/secrets/gcloud-key.
+RUN if [ -f /run/secrets/gcloud-key ]; then \
+      gcloud auth login --cred-file=/run/secrets/gcloud-key --quiet && \
+      gcloud config set project eva-prj-prd-preco-gas-gnl-s9 --quiet; \
+    fi && \
+    export GCLOUD_TOKEN="${GCLOUD_TOKEN:-$(gcloud auth print-access-token 2>/dev/null || true)}" && \
     pip install \
       --extra-index-url "https://oauth2accesstoken:${GCLOUD_TOKEN}@us-central1-python.pkg.dev/eva-prj-prd-preco-gas-gnl-s9/repo-artefatos-imagens-py-lib-custom/simple/" \
-      --no-cache-dir -r requirements.txt && \
-    rm /tmp/gcloud-key.json
+      --no-cache-dir -r requirements.txt
 
 
 # --- Estágio 2: imagem final (Playwright; chromium pré-instalado) ---

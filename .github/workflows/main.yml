@@ -61,6 +61,11 @@ jobs:
           pip install ruff
           ruff check src/ --select F821
 
+      - name: Run tests
+        run: |
+          pip install pytest
+          python -m pytest -q
+
   deploy:
     name: Build, Push and Deploy to Cloud Run Jobs
     needs: validate
@@ -96,7 +101,6 @@ jobs:
           IMAGE_URL="${{ env.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG_VERSION}"
           echo "Building and pushing image: $IMAGE_URL"
           docker build \
-            --build-arg GCLOUD_KEY_CONTENT="$(cat ${{ steps.auth.outputs.credentials_file_path }})" \
             -t "$IMAGE_URL" -f Dockerfile .
           docker push "$IMAGE_URL"
           echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV

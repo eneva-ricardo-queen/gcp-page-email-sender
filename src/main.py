@@ -1,6 +1,7 @@
 """Entry point do job: renderiza a página da tarefa e envia por e-mail."""
 
 import argparse
+import html
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -16,8 +17,8 @@ from mail import send_mail
 
 
 def _build_body(task: dict, date_str: str, files: dict) -> str:
-    before = get_body_text_before(task).format(id=task["id"], date=date_str)
-    after = get_body_text_after(task).format(id=task["id"], date=date_str)
+    before = html.escape(get_body_text_before(task).format(id=task["id"], date=date_str))
+    after = html.escape(get_body_text_after(task).format(id=task["id"], date=date_str))
     body_formats = get_body_formats(task)
 
     parts = [f"<p>{before}</p>"]
@@ -31,6 +32,7 @@ def _build_body(task: dict, date_str: str, files: dict) -> str:
             html_content = Path(path).read_text(encoding="utf-8")
             if len(html_content) > 100000:
                 html_content = html_content[:100000] + "\n<!-- truncado -->"
+            html_content = html.escape(html_content)
             parts.append(f'<details><summary>HTML completo da página</summary><pre style="white-space:pre-wrap;font-size:12px;">{html_content}</pre></details>')
     if after:
         parts.append(f"<p>{after}</p>")
