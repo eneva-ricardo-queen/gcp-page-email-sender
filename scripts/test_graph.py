@@ -7,7 +7,7 @@ import datetime
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-pep-dashboard")
+sys.path.insert(0, str(ROOT.parent / "gcp-pep-dashboard"))
 
 from config import get_task, get_sender, get_recipients, secret
 
@@ -23,7 +23,7 @@ print("sender:", sender)
 print("recipients:", recipients)
 
 import importlib.util
-spec = importlib.util.spec_from_file_location("gac", "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-pep-dashboard/src/volumes_realizados_gn_curtoprazo/sharepoint_connection/graph_api_connection.py")
+spec = importlib.util.spec_from_file_location("gac", str(Path(ROOT).parent / "gcp-pep-dashboard" / "src" / "volumes_realizados_gn_curtoprazo" / "sharepoint_connection" / "graph_api_connection.py"))
 gac = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gac)
 

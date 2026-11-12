@@ -17,7 +17,8 @@ from src.render import render_page
 url = "https://www.google.com"  # troque pela URL da RDO quando acessível
 print(f"Rendering {url} ...")
 try:
-    result = render_page(url, wait_selector="", extra_seconds=2, formats=["png"])
+    render_config = {"extra_seconds": 2}
+    result = render_page(url, formats=["png"], render_config=render_config)
     print("Captured:", result["files"])
 except Exception as e:
     print(f"Render failed: {e}")

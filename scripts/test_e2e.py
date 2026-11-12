@@ -6,12 +6,12 @@ import datetime
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-pep-dashboard")
+sys.path.insert(0, str(ROOT.parent / "gcp-pep-dashboard"))
 
 from config import get_task, get_sender, get_recipients, get_url, get_body_formats, get_attachment_formats, get_render_config, secret
 from render import render_page
 import importlib.util
-spec = importlib.util.spec_from_file_location("main_mod", "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-page-email-sender/src/main.py")
+spec = importlib.util.spec_from_file_location("main_mod", "str(ROOT / "src" / "main.py")")
 main_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(main_mod)
 _build_body = main_mod._build_body
@@ -37,7 +37,7 @@ client_id = secret("prod_PORTFOLIO_CLIENT_ID", attr="client_id")
 client_secret = secret("prod_PORTFOLIO_CLIENT_SECRET", attr="client_secret")
 
 import importlib.util
-spec = importlib.util.spec_from_file_location("gac", "/home/ricardoqueen/repos/Eneva-Preco-Gas-GNL/gcp-pep-dashboard/src/volumes_realizados_gn_curtoprazo/sharepoint_connection/graph_api_connection.py")
+spec = importlib.util.spec_from_file_location("gac", str(Path(ROOT).parent / "gcp-pep-dashboard" / "src" / "volumes_realizados_gn_curtoprazo" / "sharepoint_connection" / "graph_api_connection.py"))
 gac = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gac)
 
