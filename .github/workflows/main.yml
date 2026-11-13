@@ -64,7 +64,7 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest
-          python -m pytest -q
+          python -m pytest tests/ -q
 
   deploy:
     name: Build, Push and Deploy to Cloud Run Jobs
