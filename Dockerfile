@@ -16,8 +16,11 @@ ENV PATH="/opt/venv/bin:${PATH}"
 WORKDIR /app
 COPY requirements.txt .
 
-# Credenciais fornecidas via Workload Identity / secret mount em build (ver README).
-# Espera-se GCLOUD_TOKEN no ambiente de build ou um secret montado em /run/secrets/gcloud-key.
+# Credenciais fornecidas via BuildKit secret, env (ARG) ou gcloud local.
+# No CI o token vem via --build-arg GCLOUD_TOKEN=$(gcloud auth print-access-token).
+ARG GCLOUD_TOKEN=""
+ENV GCLOUD_TOKEN=${GCLOUD_TOKEN}
+
 RUN if [ -f /run/secrets/gcloud-key ]; then \
       gcloud auth login --cred-file=/run/secrets/gcloud-key --quiet && \
       gcloud config set project eva-prj-prd-preco-gas-gnl-s9 --quiet; \

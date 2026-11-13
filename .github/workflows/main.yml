@@ -99,8 +99,10 @@ jobs:
         run: |
           IMAGE_TAG_VERSION=$(echo $GITHUB_REF_NAME | sed 's/v//')
           IMAGE_URL="${{ env.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG_VERSION}"
+          GCLOUD_TOKEN=$(gcloud auth print-access-token)
           echo "Building and pushing image: $IMAGE_URL"
           docker build \
+            --build-arg GCLOUD_TOKEN="$GCLOUD_TOKEN" \
             -t "$IMAGE_URL" -f Dockerfile .
           docker push "$IMAGE_URL"
           echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
