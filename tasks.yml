@@ -9,6 +9,7 @@ tasks:
       - joao.rafael@eneva.com.br
       - felipe.nazare@eneva.com.br
       - ricardo.queen@eneva.com.br
+      - jackson.gama@eneva.com.br
     formats: [png, pdf]
     body_formats: [png]
     attachment_formats: [pdf]
